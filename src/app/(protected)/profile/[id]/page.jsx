@@ -3,18 +3,25 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { userService } from "@/lib/userService";
+import { portfolioService } from "@/lib/portfolioService";
 import { Badge, Card, LoadingSpinner, ErrorBanner } from "@/components/ui";
 
 export default function PublicProfilePage() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
+  const [portfolioItems, setPortfolioItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    userService
-      .getUserProfile(id)
-      .then(setProfile)
+    Promise.all([
+      userService.getUserProfile(id),
+      portfolioService.userItems(id).catch(() => []),
+    ])
+      .then(([profileData, items]) => {
+        setProfile(profileData);
+        setPortfolioItems(items);
+      })
       .catch((err) => setError(err.message || "Couldn't load this profile."))
       .finally(() => setLoading(false));
   }, [id]);
@@ -46,6 +53,37 @@ export default function PublicProfilePage() {
             ))}
           </div>
         </Card>
+      )}
+
+      {portfolioItems.length > 0 && (
+        <div className="mb-6">
+          <h2 className="font-display font-semibold text-ink mb-3">Portfolio</h2>
+          <div className="flex flex-col gap-3">
+            {portfolioItems.map((item) => (
+              <Card key={item.id} className="p-5">
+                <p className="font-display font-semibold text-ink">{item.title}</p>
+                {item.description && <p className="text-sm text-ink-soft mt-1">{item.description}</p>}
+                {item.technologies?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {item.technologies.map((t) => (
+                      <Badge key={t}>{t}</Badge>
+                    ))}
+                  </div>
+                )}
+                {item.url && (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-indigo font-medium mt-2 inline-block"
+                  >
+                    View project →
+                  </a>
+                )}
+              </Card>
+            ))}
+          </div>
+        </div>
       )}
 
       <div className="flex gap-4 text-sm">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { userService, skillService } from "@/lib/userService";
 import { Button, Input, Textarea, Badge, LoadingSpinner, ErrorBanner } from "@/components/ui";
 
@@ -139,9 +140,16 @@ export default function ProfileEditPage() {
   return (
     <div className="max-w-2xl flex flex-col gap-10">
       <div>
-        <h1 className="font-display text-3xl font-semibold text-ink mb-6">
-          {exists ? "Edit your profile" : "Build your profile"}
-        </h1>
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+          <h1 className="font-display text-3xl font-semibold text-ink">
+            {exists ? "Edit your profile" : "Build your profile"}
+          </h1>
+          {exists && (
+            <Link href="/portfolio" className="text-sm font-medium text-indigo">
+              Manage portfolio →
+            </Link>
+          )}
+        </div>
 
         <ErrorBanner message={error} />
         {success && <p className="text-sm text-signal mb-4">{success}</p>}
